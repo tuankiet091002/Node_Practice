@@ -1,6 +1,7 @@
 import Sequelize from "sequelize";
 
-const sequelize = new Sequelize("node-complete", "root", "091002", {
+//mysql db authentication here
+const sequelize = new Sequelize("", "", "", {
     dialect: "mysql",
     host: "localhost",
     logging: false,
