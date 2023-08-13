@@ -12,6 +12,7 @@ Practice project for Node Backend using MySQL database. Server-generated HTML. K
 - Platform: Node
 - View engine: EJS
 - ORM: sequelize
+- Security: Double CSRF
 - Database: MySQL
 - Mailing Service: SendGrid
 
