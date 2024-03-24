@@ -1,4 +1,4 @@
-import { validationResult } from "express-validator";
+import {validationResult} from "express-validator";
 
 import Product from "../models/product.js";
 import deleteFile from "../util/file.js";
@@ -15,7 +15,7 @@ export function getAddProduct(req, res) {
 }
 
 export function postAddProduct(req, res) {
-    const { title, price, description } = req.body;
+    const {title, price, description} = req.body;
     const image = req.file;
 
     if (!image) {
@@ -51,7 +51,6 @@ export function postAddProduct(req, res) {
             validationErrors: errors.array(),
         });
     }
-
     const imageUrl = image.path;
 
     return req.user
@@ -76,7 +75,7 @@ export function getEditProduct(req, res) {
     }
     const prodId = req.params.productId;
     return req.user
-        .getProducts({ where: { id: prodId } })
+        .getProducts({where: {id: prodId}})
         .then((products) => {
             const product = products[0];
             if (!product) {

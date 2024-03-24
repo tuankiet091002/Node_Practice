@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import PDFDocument from "pdfkit";
+import {literal} from "sequelize";
 
 import Order from "../models/order.js";
 import Product from "../models/product.js";
@@ -47,12 +48,19 @@ export function getIndex(req, res) {
 }
 
 export function getCart(req, res) {
+
     req.user
         .getCart()
-        .then((cart) =>
-            cart
-                .getProducts()
-                .then((products) =>
+        .then(cart => cart ? cart
+                .getProducts({
+                    attributes: {
+                        include: [
+                            [literal('SUM("product"."price" * "cartItem"."quantity")'), 'total']
+                        ]
+                    },
+                    group: ['product.id', 'cartItem.id']
+                })
+                .then(products =>
                     res.render("shop/cart", {
                         path: "/cart",
                         pageTitle: "Your Cart",
@@ -60,6 +68,13 @@ export function getCart(req, res) {
                     })
                 )
                 .catch((err) => console.log(err))
+            : req.user.createCart({})
+                .then(() =>
+                    res.render("shop/cart", {
+                        path: "/cart",
+                        pageTitle: "Your Cart",
+                        products: []
+                    }))
         )
         .catch((err) => console.log(err));
 }
@@ -72,7 +87,7 @@ export function postCart(req, res) {
         .getCart()
         .then((cart) => {
             fetchedCart = cart;
-            return cart.getProducts({ where: { id: prodId } });
+            return cart.getProducts({where: {id: prodId}});
         })
         .then((products) => {
             let product;
@@ -89,7 +104,7 @@ export function postCart(req, res) {
         })
         .then((product) =>
             fetchedCart.addProduct(product, {
-                through: { quantity: newQuantity },
+                through: {quantity: newQuantity},
             })
         )
         .then(() => {
@@ -102,7 +117,7 @@ export function postCartDeleteProduct(req, res) {
     const prodId = req.body.productId;
     req.user
         .getCart()
-        .then((cart) => cart.getProducts({ where: { id: prodId } }))
+        .then((cart) => cart.getProducts({where: {id: prodId}}))
         .then((products) => {
             const product = products[0];
             return product.cartItem.destroy();
@@ -141,7 +156,7 @@ export function postOrder(req, res) {
 
 export function getOrders(req, res) {
     req.user
-        .getOrders({ include: ["products"] })
+        .getOrders({include: ["products"]})
         .then((orders) => {
             res.render("shop/orders", {
                 path: "/orders",
@@ -153,10 +168,10 @@ export function getOrders(req, res) {
 }
 
 export function getInvoice(req, res) {
-    const { orderId } = req.params;
+    const {orderId} = req.params;
 
     Order.findOne({
-        where: { id: orderId, userId: req.user.id },
+        where: {id: orderId, userId: req.user.id},
         include: ["products"],
     })
         .then((order) => {
@@ -193,23 +208,4 @@ export function getInvoice(req, res) {
             pdfDoc.end();
         })
         .catch((err) => console.log(err));
-}
-
-export function getCheckout(req, res) {
-    req.user
-    .getCart()
-    .then((cart) =>
-        cart
-            .getProducts()
-            .then((products) =>
-                res.render("shop/checkout", {
-                    path: "/checkout",
-                    pageTitle: "Checkout",
-                    products,
-                    totalSum: products.reduce((x, y) => x + y.price * y.cartItem.quantity, 0).toFixed(2),
-                })
-            )
-            .catch((err) => console.log(err))
-    )
-    .catch((err) => console.log(err));
 }

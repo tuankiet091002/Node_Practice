@@ -3,9 +3,9 @@
 Practice project for Node Backend using MySQL database. Server-generated HTML. Keep for educational purposes
 
 ## Features
-* Login/Registeer, password recovery with mail.
-* Add/edit/deleteing product for sale for admin 
-* Buying/adding to cart product for normal customer
+* Login/Register, password recovery with mail.
+* Add/edit/delete product for sale for admin 
+* Buy/add to cart product for normal customer
 * Export bills to pdf
 
 ## Technologies 

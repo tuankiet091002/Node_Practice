@@ -2,11 +2,12 @@ import bodyParser from "body-parser";
 import flash from "connect-flash";
 import SequelizeStore from "connect-session-sequelize";
 import cookieParser from "cookie-parser";
-import { doubleCsrf } from "csrf-csrf";
 import express from "express";
 import session from "express-session";
 import multer from "multer";
 import path from "path";
+
+import 'dotenv/config'
 
 import get404 from "./controllers/error.js";
 import isAuth from "./middleware/is-auth.js";
@@ -23,14 +24,8 @@ import sequelize from "./util/database.js";
 
 const app = express();
 const SqlizeStore = SequelizeStore(session.Store);
-const {
-    doubleCsrfProtection, // This is the default CSRF protection middleware.
-} = doubleCsrf({
-    getSecret: () => "balldeep",
-    getTokenFromRequest: (req) => req.body.csrfToken,
-});
 
-// immage store config
+// image store config
 const fileStorage = multer.diskStorage({
     destination: (req, file, callback) => {
         callback(null, "images");
@@ -58,9 +53,9 @@ const fileFilter = (req, file, cb) => {
 app.set("view engine", "ejs");
 app.set("views", "views");
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 // save all file with name image to images folder
-app.use(multer({ storage: fileStorage, fileFilter }).single("image"));
+app.use(multer({storage: fileStorage, fileFilter}).single("image"));
 // statically distribute css files
 app.use(express.static(path.join(".", "public")));
 // statically distribute image files
@@ -77,7 +72,6 @@ app.use(
     })
 );
 app.use(cookieParser());
-app.use(doubleCsrfProtection);
 app.use(flash());
 
 app.use((req, res, next) => {
@@ -93,7 +87,6 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-    res.locals.csrfToken = req.csrfToken();
     res.locals.isAuthenticated = req.session.isLoggedIn;
     next();
 });
@@ -101,18 +94,18 @@ app.use((req, res, next) => {
 app.use("/admin", isAuth, adminRoutes);
 app.use("/", shopRoutes);
 app.use(authRoutes);
-
 app.use(get404);
+
 // sequelize associations
-Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
+Product.belongsTo(User, {constraints: true, onDelete: "CASCADE"});
 User.hasMany(Product);
 User.hasOne(Cart);
 Cart.belongsTo(User);
-Cart.belongsToMany(Product, { through: CartItem });
-Product.belongsToMany(Cart, { through: CartItem });
+Cart.belongsToMany(Product, {through: CartItem});
+Product.belongsToMany(Cart, {through: CartItem});
 Order.belongsTo(User);
 User.hasMany(Order);
-Order.belongsToMany(Product, { through: OrderItem });
+Order.belongsToMany(Product, {through: OrderItem});
 
 sequelize
     .sync()

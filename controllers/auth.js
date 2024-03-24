@@ -10,9 +10,7 @@ import User from "../models/user.js";
 const transporter = nodemailer.createTransport(
     sendgridTransport({
         auth: {
-            api_key:
-            // sendgrid api key here
-                "",
+            api_key: process.env.SENDGRID_KEY,
         },
     })
 );
@@ -173,6 +171,7 @@ export function postReset(req, res) {
                     to: "tuankiet091002@gmail.com",
                     from: "tuankiet091002@gmail.com",
                     subject: "Password reset",
+                    text: "Password reset email",
                     html: `
                 <p>You requested a password reset</p>
                 <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to set a new password.</p>

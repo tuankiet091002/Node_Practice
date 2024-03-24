@@ -21,11 +21,11 @@ router.get("/products", getProducts);
 // /admin/add-product => POST
 router.post(
     "/add-product",
-    [
-        body("title").isString().isLength({ min: 3 }).trim(),
-        body("price").isFloat(),
-        body("description").isLength({ min: 5, max: 400 }).trim(),
-    ],
+        [
+            body("title").isString().isLength({ min: 3 }).trim(),
+            body("price").isFloat(),
+            body("description").isLength({ min: 5, max: 400 }).trim(),
+        ],
     postAddProduct
 );
 
